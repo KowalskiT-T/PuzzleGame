@@ -1,8 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using PuzzleData;
 using Newtonsoft.Json;
+using GameManagement;
 using Grid;
 
 namespace Player
@@ -13,12 +13,12 @@ namespace Player
         private readonly string _coinsPrefs = "player_coins";
         private readonly string _hintsPrefs = "player_hints";
         private readonly string _savedPuzzlesPref = "player_savedPuzzle";
-        private readonly string _savedCurrentPuzzlePref = "player_savedCurrentPuzzle";
+        private readonly string _currentLevel = "player_savedCurrentPuzzle";
 
         private int _coinsAmount;
         private int _hintsAmount;
         private List<PuzzleSavingData> _savedPuzzles;
-        private PuzzleSavingData _currentPuzzle;
+        private Level _currentPuzzle;
 
         #region Singleton Pattern
         public static PlayerData Instance { get; private set; }
@@ -43,7 +43,7 @@ namespace Player
             _hintsAmount = PlayerPrefs.GetInt(_hintsPrefs, 3);
             Debug.Log("Hints" + _hintsAmount);
             _savedPuzzles = JsonConvert.DeserializeObject<List<PuzzleSavingData>>(PlayerPrefs.GetString(_savedPuzzlesPref));
-            _currentPuzzle = JsonConvert.DeserializeObject<PuzzleSavingData>(PlayerPrefs.GetString(_savedCurrentPuzzlePref));
+            _currentPuzzle = JsonConvert.DeserializeObject<Level>(PlayerPrefs.GetString(_currentLevel));
         }
 
         public void SavePlayerPuzzleProgress(PuzzleSavingData puzzleToSave)
@@ -58,10 +58,10 @@ namespace Player
                 PlayerPrefs.SetString(_savedPuzzlesPref, savedPuzzles);
             }
         }
-        public void SetCurrentPuzzle(PuzzleSavingData puzzle)
+        public void SetCurrentPuzzle(Level puzzle)
         {
             _currentPuzzle = puzzle;
-            PlayerPrefs.SetString(_savedCurrentPuzzlePref, JsonConvert.SerializeObject(puzzle));
+            PlayerPrefs.SetString(_currentLevel, JsonConvert.SerializeObject(puzzle));
         }
 
         #endregion
@@ -92,7 +92,7 @@ namespace Player
         public int CoinsAmount => _coinsAmount;
         public int HintsAmount => _hintsAmount;
         public List<PuzzleSavingData> SavedPuzzles => _savedPuzzles;
-        public PuzzleSavingData CurrentPuzzle => _currentPuzzle;
+        public Level CurrentPuzzle => _currentPuzzle;
     }
 }
 

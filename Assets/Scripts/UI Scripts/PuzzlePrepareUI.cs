@@ -23,42 +23,70 @@ public class PuzzlePrepareUI : MonoBehaviour
     private float _snapSpeed;
     private bool _isSnapped;
     private int _currentItemSnapping;
+    private float _deltaPosition;
+    private float _fullwidth;
+    private int _maxScrollvelocity = 200;
 
-    private void OnDisable()
+
+    private void Start()
     {
-        _contentPanel.localPosition = new Vector3(0, _contentPanel.localPosition.y, _contentPanel.localPosition.z);
+        ItemChanging?.Invoke(_contentPanel.localPosition.x);
+        _fullwidth = _sampleListItem.rect.width + _horizontalLayoutGroup.spacing;
     }
 
-    void Update()
+    private void Update()
     {
-        int currentItemSnapping = Mathf.RoundToInt(0 - _contentPanel.localPosition.x / (_sampleListItem.rect.width + _horizontalLayoutGroup.spacing));
+        SnappingItem();
+    }
+
+    private void SnappingItem()
+    {
+        _deltaPosition = -_contentPanel.localPosition.x / _fullwidth;
+        int currentItemSnapping = Mathf.RoundToInt(_deltaPosition);
         currentItemSnapping = Mathf.Clamp(currentItemSnapping, 0, _difficiltiesList.GridDiffucultiesList.Count - 1);
 
+        ChagingDifficulty(currentItemSnapping);        
+
+        ChangingScrollItem();
+
+        if (_scrollRect.velocity.magnitude < _maxScrollvelocity && !_isSnapped)
+        {
+            _scrollRect.velocity = Vector2.zero;
+            _snapSpeed += _snapForce * Time.deltaTime;
+            _contentPanel.localPosition = new Vector3(
+                Mathf.MoveTowards(_contentPanel.localPosition.x, -_currentItemSnapping * _fullwidth, _snapSpeed),
+                 _contentPanel.localPosition.y,
+                 _contentPanel.localPosition.z);
+
+            ItemChanging?.Invoke(_contentPanel.localPosition.x);
+
+            if (_contentPanel.localPosition.x == -_currentItemSnapping * _fullwidth)
+                _isSnapped = true;
+        }
+        if (_scrollRect.velocity.magnitude > _maxScrollvelocity)
+        {
+            _isSnapped = false;
+            _snapSpeed = 0;
+        }
+    }
+
+    private void ChagingDifficulty(int currentItemSnapping)
+    {
         if (_currentItemSnapping != currentItemSnapping)
         {
             ScrollItemChanged?.Invoke(currentItemSnapping);
             _currentItemSnapping = currentItemSnapping;
         }
-        ItemChanging?.Invoke(_contentPanel.localPosition.x);
-        if (_scrollRect.velocity.magnitude < 200 && !_isSnapped)
-        {
-            _scrollRect.velocity = Vector2.zero;
-            _snapSpeed += _snapForce * Time.deltaTime;
-            _contentPanel.localPosition = new Vector3(
-                Mathf.MoveTowards(_contentPanel.localPosition.x, 0 - (_currentItemSnapping * (_sampleListItem.rect.width + _horizontalLayoutGroup.spacing)), _snapSpeed),
-                 _contentPanel.localPosition.y,
-                 _contentPanel.localPosition.z);
+    }
 
-            if (_contentPanel.localPosition.x == 0 - (_currentItemSnapping * (_sampleListItem.rect.width + _horizontalLayoutGroup.spacing)))
-            {
-                _isSnapped = true;
-            }
+    private void ChangingScrollItem()
+    {
+        if (_scrollRect.velocity.magnitude > 1)
+             ItemChanging?.Invoke(_contentPanel.localPosition.x);
+    }
 
-        }
-        if (_scrollRect.velocity.magnitude > 200)
-        {
-            _isSnapped = false;
-            _snapSpeed = 0;
-        }
+    private void OnDisable()
+    {
+        _contentPanel.localPosition = new Vector3(0, _contentPanel.localPosition.y, _contentPanel.localPosition.z);
     }
 }

@@ -11,13 +11,11 @@ namespace PuzzleData
     {
         [SerializeField] private int _id;
         [SerializeField] private string _name;
-        [SerializeField] private Material _puzzleMaterial;
         [SerializeField] private Sprite _puzzleImage;
         [SerializeField] private bool _isLocked;
 
         public int Id => _id;
         public string Name => _name;
-        public Material PuzzleMaterial => _puzzleMaterial;
         public Sprite PuzzleImage => _puzzleImage;
         public bool IsLocked => _isLocked;
 

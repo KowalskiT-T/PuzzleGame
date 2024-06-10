@@ -21,11 +21,12 @@ namespace Grid {
         private Material _material;
 
 
-        public void InitializeGrid(GridSO gridSO, Material material)
+        public void InitializeGrid(GridSO gridSO, Texture2D texture)
         {
             _gridSO = gridSO;
-            _material = material;
-            
+
+            _material = new Material(Shader.Find("Unlit/Texture")){mainTexture = texture};
+
             _cellSize = _gridField.CellSize;
 
             _pieceConfigurations = new PieceConfiguration[_gridSO.Height, _gridSO.Width];

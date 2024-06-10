@@ -6,11 +6,11 @@ namespace UIscripts
 {
     public class PopUpClose : MonoBehaviour
     {
-        [SerializeField] GameObject ToClose;
+        [SerializeField] GameObject _toClose;
 
         public void Close()
         {
-            UIManager.OnCrossClick?.Invoke(ToClose);
+            UIManager.OnCrossClick?.Invoke(_toClose);
         }
     }
 }

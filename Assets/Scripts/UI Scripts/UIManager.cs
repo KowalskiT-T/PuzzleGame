@@ -46,10 +46,12 @@ namespace UIscripts
         public static Action<int> OnLockedPanelClick;
         public static Action<int> OnPanelClick;
 
-        private PuzzleSO _currentPuzzleSO;
-
         [SerializeField] private GridSOList _diffucultiesList;
         private GridSO _currentGridSO;
+        private PuzzleSO _currentPuzzleSO;
+        private Level _currentLevel;
+        private int startingGridSOindex = 0;
+        private bool startingRotationRule;
 
         [Space]
         [Header("Scroll")]
@@ -65,13 +67,20 @@ namespace UIscripts
             OnPanelClick += LoadPuzzleDifficultyChooser;
             PuzzlePrepareUI.ScrollItemChanged += SetCurrentGridSO;
         }
+        private void OnDestroy()
+        {
+            OnPanelsChange -= TurnIterectableButton;
+            OnCrossClick -= CloseWindow;
+            OnLockedPanelClick -= LoadBuyPanelPopUp;
+            OnPanelClick -= LoadPuzzleDifficultyChooser;
+            PuzzlePrepareUI.ScrollItemChanged -= SetCurrentGridSO;
+        }
         private void Start()
         {
             LoadAllPuzzles();
             LoadPlayerPuzzles();
             LoadCoins();
             LoadDifficulties();
-            SetCurrentGridSO(0);
         }
 
         public void LoadAllPuzzles()
@@ -96,7 +105,7 @@ namespace UIscripts
         }
         public void StartPuzzle()
         {
-            PlayerData.Instance.SetCurrentPuzzle(new PuzzleSavingData(_currentPuzzleSO.Id, _currentGridSO));
+            PlayerData.Instance.SetCurrentPuzzle(_currentLevel);
             SceneManager.LoadScene("Main");
         }
         private void LoadDifficulties()
@@ -140,20 +149,22 @@ namespace UIscripts
         }
         public void LoadPuzzleDifficultyChooser(int puzzleID)
         {
-            foreach (var puzzle in _puzzles.List)
+            if (_puzzles.GetPuzzleByID(puzzleID, out var puzzle))
             {
-                if (puzzleID == puzzle.Id)
-                {
-                    _puzzleToChoose.LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.Id);
-                    _puzzleLoaderObject.SetActive(true);
-                    _currentPuzzleSO = puzzle;
-                    break;
-                }
+                _puzzleToChoose.LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.Id);
+                _puzzleLoaderObject.SetActive(true);
+                _currentPuzzleSO = puzzle;
+                _currentLevel = new Level(_diffucultiesList.GridDiffucultiesList[startingGridSOindex], puzzle, startingRotationRule);
             }
+            else
+            {
+                Debug.LogError($"CAN NOT FIND PUZZLE! id = {puzzleID}");
+            }
+ 
         }
         private void SetCurrentGridSO(int index)
         {
-            _currentGridSO = _diffucultiesList.GridDiffucultiesList[index];
+            _currentLevel.SetGridSO(_diffucultiesList.GridDiffucultiesList[index]);
         }
         #endregion
 

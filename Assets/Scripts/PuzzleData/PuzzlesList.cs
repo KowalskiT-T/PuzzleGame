@@ -1,7 +1,5 @@
 using PuzzleData;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 using System.Linq;
 
@@ -13,9 +11,10 @@ using System.Linq;
 
         public List<PuzzleSO> List => _puzzleList;
 
-        public PuzzleSO GetPuzzleByID(int id)
+        public bool GetPuzzleByID(int id, out PuzzleSO puzzleSo)
         {
-            return _puzzleList.FirstOrDefault(puzzle => puzzle.Id == id);
+            puzzleSo = _puzzleList.FirstOrDefault(puzzle => puzzle.Id == id);
+            return puzzleSo != null;
         }
     }
 

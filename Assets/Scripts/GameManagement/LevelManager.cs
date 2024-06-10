@@ -31,14 +31,7 @@ namespace GameManagement
             {
                 return new Level(_debugLevel.GridSO, _debugLevel.PuzzleSO, _debugLevel.RotationEnabled);
             }
-            
-            PuzzleSavingData currentPuzzle = PlayerData.Instance.CurrentPuzzle;
-            _progressManager.SetNumberOfPieces(currentPuzzle.Grid.Area);
-            PuzzleSO currentPuzzleSO = _puzzleList.GetPuzzleByID(currentPuzzle.ID);
-
-            bool rotationEnabled = true;
-
-            return new Level(currentPuzzle.Grid, currentPuzzleSO, rotationEnabled);
+            return PlayerData.Instance.CurrentPuzzle;
         }
 
         private void StartLevel(Level level)
