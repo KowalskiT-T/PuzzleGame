@@ -43,7 +43,7 @@ namespace Grid
 
             if(puzzleList.GetPuzzleByID(level.PuzzleID, out var puzzle))
                     _gridGenerator.InitializeGrid(_gridSO, puzzle.PuzzleImage.texture);
-            else { Debug.LogError($"GridManager: CAN NOT INITIALIZE GRID: CAN NOT FIND PUZZLE BY ID id = {level.PuzzleID}");}
+            else { Debug.LogError($"GridManager: ERROR WITH PUZZLE ID");}
 
             _gridInteractionController.SetRotationEnabled(level.RotationEnabled);
 

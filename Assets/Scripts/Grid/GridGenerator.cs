@@ -25,7 +25,7 @@ namespace Grid {
         {
             _gridSO = gridSO;
 
-            _material = new Material(Shader.Find("Unlit/Texture")){mainTexture = texture};
+            _material = new Material(Shader.Find("Shader Graphs/PieceShaderGraph")){mainTexture = texture};
 
             _cellSize = _gridField.CellSize;
 

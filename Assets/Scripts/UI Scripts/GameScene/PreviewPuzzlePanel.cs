@@ -24,7 +24,7 @@ public class PreviewPuzzlePanel : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"PreviewPuzzlePanel: CAN NOT FIND PUZZLE BY ID id = {level.PuzzleID}");
+            Debug.LogError($"PreviewPuzzlePanel: EROR BY PUZZLE ID");
         }
         
     }

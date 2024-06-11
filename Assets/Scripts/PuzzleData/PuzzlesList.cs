@@ -14,6 +14,11 @@ using System.Linq;
         public bool GetPuzzleByID(int id, out PuzzleSO puzzleSo)
         {
             puzzleSo = _puzzleList.FirstOrDefault(puzzle => puzzle.Id == id);
+            if(puzzleSo == null)
+            {
+                Debug.LogError($"PUZZLE CAN NOT BE FOUND id = {id}");
+                return false;
+            }
             return puzzleSo != null;
         }
     }

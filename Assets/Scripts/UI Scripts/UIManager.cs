@@ -158,7 +158,7 @@ namespace UIscripts
             }
             else
             {
-                Debug.LogError($"UIManager: CAN NOT FIND PUZZLE! id = {puzzleID}");
+                Debug.LogError($"UIManager: ERROR BY PUZZLE ID");
             }
  
         }
