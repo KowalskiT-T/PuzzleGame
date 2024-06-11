@@ -154,11 +154,11 @@ namespace UIscripts
                 _puzzleToChoose.LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.Id);
                 _puzzleLoaderObject.SetActive(true);
                 _currentPuzzleSO = puzzle;
-                _currentLevel = new Level(_diffucultiesList.GridDiffucultiesList[startingGridSOindex], puzzle, startingRotationRule);
+                _currentLevel = new Level(_diffucultiesList.GridDiffucultiesList[startingGridSOindex], puzzle.Id, startingRotationRule);
             }
             else
             {
-                Debug.LogError($"CAN NOT FIND PUZZLE! id = {puzzleID}");
+                Debug.LogError($"UIManager: CAN NOT FIND PUZZLE! id = {puzzleID}");
             }
  
         }

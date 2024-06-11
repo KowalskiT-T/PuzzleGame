@@ -10,7 +10,7 @@ namespace GameManagement
 {
     public class LevelManager : MonoBehaviour
     {
-        public static Action<Level> LevelStarted;
+        public static Action<Level, PuzzleList> LevelStarted;
 
         [SerializeField] private PuzzleList _puzzleList;
         [SerializeField] private ProgressManager _progressManager;
@@ -29,14 +29,14 @@ namespace GameManagement
         {
             if (PlayerData.Instance == null) 
             {
-                return new Level(_debugLevel.GridSO, _debugLevel.PuzzleSO, _debugLevel.RotationEnabled);
+                return new Level(_debugLevel.GridSO, _debugLevel.PuzzleSO.Id, _debugLevel.RotationEnabled);
             }
             return PlayerData.Instance.CurrentPuzzle;
         }
 
         private void StartLevel(Level level)
         {
-            LevelStarted?.Invoke(level);
+            LevelStarted?.Invoke(level, _puzzleList);
         }
 
     }

@@ -42,8 +42,11 @@ namespace Player
             Debug.Log("Coins" + _coinsAmount);  
             _hintsAmount = PlayerPrefs.GetInt(_hintsPrefs, 3);
             Debug.Log("Hints" + _hintsAmount);
-            _savedPuzzles = JsonConvert.DeserializeObject<List<PuzzleSavingData>>(PlayerPrefs.GetString(_savedPuzzlesPref));
-            _currentPuzzle = JsonConvert.DeserializeObject<Level>(PlayerPrefs.GetString(_currentLevel));
+            _savedPuzzles = JsonConvert.DeserializeObject<List<PuzzleSavingData>>(PlayerPrefs.GetString(_savedPuzzlesPref));            
+            if(PlayerPrefs.GetString(_currentLevel) != null)
+            {
+                _currentPuzzle = JsonConvert.DeserializeObject<Level>(PlayerPrefs.GetString(_currentLevel));
+            }
         }
 
         public void SavePlayerPuzzleProgress(PuzzleSavingData puzzleToSave)

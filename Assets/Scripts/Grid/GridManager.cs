@@ -30,18 +30,20 @@ namespace Grid
             LevelManager.LevelStarted -= HandleLevelStarted;
         }
 
-        private void HandleLevelStarted(Level level)
+        private void HandleLevelStarted(Level level, PuzzleList puzzleList)
         {
-            GenerateGrid(level);
+            GenerateGrid(level, puzzleList);
         }
 
-        private void GenerateGrid(Level level)
+        private void GenerateGrid(Level level, PuzzleList puzzleList)
         {
             _gridSO = level.GridSO;
 
             _gridField.Initialize(_gridSO);
 
-            _gridGenerator.InitializeGrid(_gridSO, level.PuzzleSO.PuzzleImage.texture);
+            if(puzzleList.GetPuzzleByID(level.PuzzleID, out var puzzle))
+                    _gridGenerator.InitializeGrid(_gridSO, puzzle.PuzzleImage.texture);
+            else { Debug.LogError($"GridManager: CAN NOT INITIALIZE GRID: CAN NOT FIND PUZZLE BY ID id = {level.PuzzleID}");}
 
             _gridInteractionController.SetRotationEnabled(level.RotationEnabled);
 

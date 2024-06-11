@@ -16,9 +16,17 @@ public class PreviewPuzzlePanel : MonoBehaviour
         LevelManager.LevelStarted -= HandleLevelStarted;
     }
 
-    private void HandleLevelStarted(Level level)
+    private void HandleLevelStarted(Level level, PuzzleList puzzleList)
     {
-        _previewImage.sprite = level.PuzzleSO.PuzzleImage;
+        if(puzzleList.GetPuzzleByID(level.PuzzleID, out var puzzle))
+        {
+            _previewImage.sprite = puzzle.PuzzleImage;
+        }
+        else
+        {
+            Debug.LogError($"PreviewPuzzlePanel: CAN NOT FIND PUZZLE BY ID id = {level.PuzzleID}");
+        }
+        
     }
 
 }
