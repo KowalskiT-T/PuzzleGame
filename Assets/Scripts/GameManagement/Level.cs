@@ -25,5 +25,15 @@ namespace GameManagement
         {
             _gridSO = newGridSO;
         }
+
+        public void SetRotation()
+        {
+            if(_rotationEnabled)
+                _rotationEnabled = false;
+            else
+            {
+                _rotationEnabled = true;
+            }
+        }
     }
 }

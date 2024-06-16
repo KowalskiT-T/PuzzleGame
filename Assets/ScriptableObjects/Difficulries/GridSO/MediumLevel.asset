@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _width: 10
   _height: 10
+  _coinReward: 250
