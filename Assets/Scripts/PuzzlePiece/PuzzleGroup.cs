@@ -15,20 +15,20 @@ namespace PuzzlePiece
         private List<Piece> _pieces = new List<Piece>();
         private List<Piece> _lastPieces = new List<Piece>();
         private bool _isAnimating = false;
-        private const int COLLECTED_Z_POSITION = 1;
+        private const int COLLECTED_Z_POSITION = 0;
         private float _snappingDuration = 0.05f;
         private float _rotationDuration = 0.2f;
         private float _rotationAngle = -90;
 
-        public static event Action<List<Piece>> OnCollectedNewPieces;
         public static event Action<ISnappable> OnGroupRotated;
         public static event Action<ISnappable> OnGridSnapCompleted;
+        public static event Action<ISnappable> OnGroupSnappedToGrid;
+        public static event Action<ISnappable> OnCombinedWithOther;
 
         public Transform Transform => transform;
         public List<Piece> Pieces => _pieces;
         public Draggable Draggable => _draggable;
         public bool IsAnimating => _isAnimating;
-
 
         public void InitializeGroup(List<Piece> pieces)
         {
@@ -54,13 +54,8 @@ namespace PuzzlePiece
 
         public static PuzzleGroup CreateGroup(List<Piece> pieces)
         {
-            Vector3 centerPoint = Vector3.zero;
-            foreach (Piece piece in pieces)
-            {
-                centerPoint += piece.transform.position;
-            }
-            centerPoint /= pieces.Count;
-
+            Vector3 centerPoint = GetCenterPoint(pieces);
+            
             Transform parent = pieces[0].transform.parent;
 
             GameObject groupObject = new GameObject(PUZZLE_GROUP);
@@ -72,9 +67,17 @@ namespace PuzzlePiece
 
             return group;
         }
+        
+        private static Vector3 GetCenterPoint(List<Piece> _pieces)
+        {
+            return _pieces.Aggregate(Vector3.zero, (sum, piece) => sum + piece.transform.position) / _pieces.Count;
+        }
 
+        # region SnapToGrid
         public bool TrySnapToGrid()
         {
+            if (IsSnappedToGrid()) return false;
+
             bool snap = _pieces.Any(piece => piece.CanSnapToGrid()); 
 
             if (snap)
@@ -87,8 +90,7 @@ namespace PuzzlePiece
                     sequence.Join(moveTween);
                 }
 
-                Destroy(_draggable);
-                Destroy(_clickable);
+                DestroyInteractiveComponents();
 
                 sequence.OnComplete(FinishSnapToCorrectPosition);
             }
@@ -99,15 +101,30 @@ namespace PuzzlePiece
 
         private void FinishSnapToCorrectPosition()
         {
-            OnCollectedNewPieces.Invoke(_pieces);
             UpdateZPosition(COLLECTED_Z_POSITION);
 
-            StartMaterialAnimation(_pieces);
+            OnGroupSnappedToGrid?.Invoke(this);
         }
+
+        public bool IsSnappedToGrid()
+        {
+            return _draggable == null;
+        }
+
+        private void DestroyInteractiveComponents()
+        {
+            Destroy(_draggable);
+            Destroy(_clickable);
+
+            _draggable = null;
+            _clickable = null;
+        }
+
+        # endregion
 
         public ISnappable CombineWith(Piece otherPiece)
         {
-            SnapGroupPosition(otherPiece);
+            SnapGroupPositionToOtherPiece(otherPiece);
 
             PuzzleGroup neighbourGroup = otherPiece.Group;
 
@@ -140,11 +157,13 @@ namespace PuzzlePiece
             return null;
         }
 
-        private void SnapGroupPosition(Piece referencePiece)
+        private void SnapGroupPositionToOtherPiece(Piece referencePiece)
         {
-            _isAnimating = true;
+            if (IsSnappedToGrid()) return;
+            
+            if (_isAnimating) return;
 
-            _lastPieces = _pieces.ToList();
+            _isAnimating = true;
 
             Sequence sequence = DOTween.Sequence();
 
@@ -160,29 +179,29 @@ namespace PuzzlePiece
         private void FinishSnapGroupAnimation()
         {
             _isAnimating = false;
-            
-            StartMaterialAnimation(_lastPieces);
+
+            if (IsSnappedToGrid())
+            {
+                UpdateZPosition(COLLECTED_Z_POSITION);
+            }
+
+            OnCombinedWithOther?.Invoke(this);
         }
 
         public void AddPieceToGroup(Piece piece)
         {
-            if (piece.Draggable == null)
+            bool pieceInteractable = piece.Draggable != null;
+
+            _pieces.Add(piece);
+        
+            if (!pieceInteractable)
             {
-                Destroy(_draggable);
-                Destroy(_clickable);
-                OnCollectedNewPieces.Invoke(_pieces);
+                DestroyInteractiveComponents();
                 UpdateZPosition(COLLECTED_Z_POSITION);
             }
 
-            if (_draggable == null)
-            {
-                OnCollectedNewPieces.Invoke(new List<Piece> { piece });
-            }
-
-            piece.SetGroup(this);
             piece.SetupForGroup();
-
-            _pieces.Add(piece);
+            piece.SetGroup(this);
         }
 
         private bool IsTheSameGroup(PuzzleGroup group)
@@ -193,14 +212,15 @@ namespace PuzzlePiece
 
         private void MergeGroup(PuzzleGroup otherGroup)
         {
-            if (otherGroup.Draggable == null)
-            {
-                Destroy(_draggable);
-                Destroy(_clickable);
-                OnCollectedNewPieces.Invoke(_pieces);
-            }
+            bool otherGroupsInteractable = otherGroup.Draggable != null;
 
             UpdatePiecesGroup(otherGroup.Pieces);
+
+            if (!otherGroupsInteractable)
+            {
+                DestroyInteractiveComponents();
+                UpdateZPosition(COLLECTED_Z_POSITION);
+            }
         
             Destroy(otherGroup.gameObject);
         }
@@ -240,48 +260,55 @@ namespace PuzzlePiece
 
         public void AddToCollectedPieces(List<Piece> collectedPieces)
         {
-            foreach (Piece piece in _pieces)
-            {
-                collectedPieces.Add(piece);
-            }
+            _pieces.ForEach(piece => collectedPieces.Add(piece));
         }
 
-        public void UpdateZPosition(int zPosition)
+        public void UpdateZPosition(int zPosition = COLLECTED_Z_POSITION)
         {
             Vector3 position = transform.position;
             position.z = zPosition;
             transform.position = position;
 
-            foreach (Piece piece in _pieces)
-            {
-                piece.UpdateZPosition(zPosition);
-            }
+            _pieces.ForEach(piece => piece.UpdateZPosition(zPosition));
         }
 
+
         # region Rotation
+
         public void Rotate(Vector3 mousePosition)
         {
             if (_isAnimating) return;
 
-            Piece piece = GetPieceAtMousePosition(mousePosition);
+            var piece = GetPieceAtMousePosition(mousePosition);
 
             _isAnimating = true;
 
+            var sequence = GetRotationSequence(piece, _rotationAngle, _rotationDuration);
+
+            sequence.OnComplete(FinishRotation);
+        }
+
+        public Sequence GetRotationSequence(Piece piece, float rotationAngle, float rotationDuration)
+        {
             Sequence sequence = DOTween.Sequence();
 
             foreach (Transform child in transform)
             {
-                Vector3 newPosition = RotatePointAroundPivot(child.position, piece.transform.position, _rotationAngle);
-                Vector3[] path = GetCircularPath(child.position, piece.transform.position, _rotationAngle, 5);
+                Vector3 newPosition = RotatePointAroundPivot(child.position, piece.transform.position, rotationAngle);
 
-                Tween moveTween = child.DOPath(path, _rotationDuration, PathType.CatmullRom);
-                Tween rotateTween = child.DORotate(child.eulerAngles + new Vector3(0, 0, _rotationAngle), _rotationDuration);
+                int pathPoints = 5;
+                Vector3[] path = GetCircularPath(child.position, piece.transform.position, rotationAngle, pathPoints);
+
+                Tween moveTween = child.DOPath(path, rotationDuration, PathType.CatmullRom);
+                Tween rotateTween = child.DORotate(child.eulerAngles + new Vector3(0, 0, rotationAngle), rotationDuration);
 
                 sequence.Insert(0, moveTween);
                 sequence.Insert(0, rotateTween);
             }
 
-            sequence.OnComplete(FinishRotation);
+            // sequence.OnComplete(FinishRotation);
+
+            return sequence;
         }
 
         private void FinishRotation()
@@ -324,9 +351,53 @@ namespace PuzzlePiece
 
         # endregion
 
-        private void StartMaterialAnimation(List<Piece> pieces)
+        # region Animation  
+        
+        public void AnimateToCorrectPosition(float duration, int zPosition)
         {
-            pieces.ForEach(piece => piece.StartMaterialAnimation());
+            Piece pivotPiece = GetCenterPiece();
+            UpdateZPosition(zPosition);
+            
+            Sequence sequence = DOTween.Sequence();
+
+            if (!pivotPiece.IsInCorrectRotation())
+            {
+                float angle = -pivotPiece.transform.rotation.eulerAngles.z;
+
+                // for -270 to smooth rotation
+                angle = angle < -180 ? angle + 360 : angle;
+
+                sequence.Append(GetRotationSequence(pivotPiece, angle, duration/2));
+            }
+
+            Sequence moveSequence = DOTween.Sequence();
+
+            foreach (Piece piece in _pieces)
+            {
+                Vector3 correctPosition = piece.CorrectPosition;
+                correctPosition.z = zPosition;
+
+                Tween moveTween = piece.transform.DOMove(correctPosition, duration);
+                moveSequence.Join(moveTween);
+            }
+
+            sequence.Append(moveSequence);
+
+            sequence.OnComplete(InvokeItemDropped);
+        }
+
+        private Piece GetCenterPiece()
+        {
+            Vector3 averagePosition = GetCenterPoint(_pieces);
+        
+            return _pieces.OrderBy(piece => Vector3.Distance(piece.CorrectPosition, averagePosition)).First();
+        }
+
+        # endregion 
+
+        private void InvokeItemDropped()
+        {
+            _draggable.InvokeItemDropped();
         }
 
     }

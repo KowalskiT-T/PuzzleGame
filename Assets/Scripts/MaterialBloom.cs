@@ -20,10 +20,15 @@ public class MaterialBloom : MonoBehaviour
         _animationMaterial = _renderer.material;
     }
 
-    public void AnimateMaterial()
+    public void AnimateMaterial(float bloomIntensityCoefficient)
     {
-        Sequence bloomSequence = GetBloomAnimation(_bloomIntensity, _animationDuration);
-        Sequence tintSequence = GetColorTintAnimation(_animationTintColor, _animationDuration);
+        Color tintColor = _animationTintColor;
+        tintColor.a *= bloomIntensityCoefficient;
+
+        float bloomIntensity = Mathf.Lerp(1, _bloomIntensity, bloomIntensityCoefficient);
+
+        Sequence bloomSequence = GetBloomAnimation(bloomIntensity, _animationDuration);
+        Sequence tintSequence = GetColorTintAnimation(tintColor, _animationDuration);
 
         bloomSequence.Play();
         tintSequence.Play();
@@ -52,6 +57,11 @@ public class MaterialBloom : MonoBehaviour
         sequence.Append(_animationMaterial.DOColor(_animationBaseColor, BASE_COLOR, duration/2));
 
         return sequence;
+    }
+
+    public void AnimateOpacity(float targetOpacity, float duration)
+    {
+        _animationMaterial.DOColor(new Color(1, 1, 1, targetOpacity), BASE_COLOR, duration);
     }
 
 }
