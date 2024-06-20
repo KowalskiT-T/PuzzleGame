@@ -46,6 +46,9 @@ namespace UIscripts
         public static Action<int> OnLockedPanelClick;
         public static Action<int> OnPanelClick;
 
+        public delegate void OnRotationChange();
+        public static OnRotationChange onRotationChange;
+
         [SerializeField] private GridSOList _diffucultiesList;
         private GridSO _currentGridSO;
         private PuzzleSO _currentPuzzleSO;
@@ -65,7 +68,9 @@ namespace UIscripts
             OnCrossClick += CloseWindow;
             OnLockedPanelClick += LoadBuyPanelPopUp;
             OnPanelClick += LoadPuzzleDifficultyChooser;
+            onRotationChange += ChangeRotation;
             PuzzlePrepareUI.ScrollItemChanged += SetCurrentGridSO;
+            PlayerData.onCoinsChanged += LoadCoins;
         }
         private void OnDestroy()
         {
@@ -85,7 +90,9 @@ namespace UIscripts
 
         public void LoadAllPuzzles()
         {
-            _puzzles.List.ForEach(puzzle => Instantiate(_puzzlePrefab, _puzzleParent.transform).LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.IsLocked, puzzle.Id));
+            _puzzles.List.ForEach(puzzle => 
+             Instantiate(_puzzlePrefab, _puzzleParent.transform)
+            .LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.IsLocked, puzzle.ID));
         }
         public void LoadPlayerPuzzles()
         {
@@ -93,13 +100,14 @@ namespace UIscripts
             {
                 foreach (var playerPuzzle in PlayerData.Instance.SavedPuzzles)
                 {
-                    foreach (var puzzle in _puzzles.List)
+                    _puzzles.List.ForEach(puzzle =>
                     {
-                        if (playerPuzzle.ID == puzzle.Id)
+                        if (playerPuzzle.ID == puzzle.ID)
                         {
-                            Instantiate(_puzzlePrefab, _playerPuzzleParent.transform).LoadPuzzlePanel(puzzle.PuzzleImage, playerPuzzle.ID);
+                            Instantiate(_puzzlePrefab, _playerPuzzleParent.transform).
+                            LoadPuzzlePanel(puzzle.PuzzleImage, playerPuzzle.ID);
                         }
-                    }
+                    });
                 }
             }            
         }
@@ -112,8 +120,14 @@ namespace UIscripts
         {
             for (int i = 0; i < _diffucultiesList.GridDiffucultiesList.Count; i++)
             {
-                Instantiate(_scrollPrefab, _scrollParent.transform).LoadScrollElement(_diffucultiesList.GridDiffucultiesList[i], i);
+                Instantiate(_scrollPrefab, _scrollParent.transform)
+                .LoadScrollElement(_diffucultiesList.GridDiffucultiesList[i], i);
             }
+        }
+
+        public void ChangeRotation()
+        {
+            _currentLevel.SetRotation();
         }
 
         #region MenuButtonsInteraction
@@ -137,11 +151,11 @@ namespace UIscripts
         #region ChoosePuzzleInteraction
         public void LoadBuyPanelPopUp(int puzzleID)
         {
-            foreach(var puzzle in _puzzles.List)
+            foreach (var puzzle in _puzzles.List)
             {
-                if(puzzleID == puzzle.Id)
+                if (puzzleID == puzzle.ID)
                 {
-                    _puzzleToBuyPopUpObject.LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.Id);
+                    _puzzleToBuyPopUpObject.LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.ID);
                     _puzzleToBuyPopUp.SetActive(true);
                     break;
                 }
@@ -151,10 +165,12 @@ namespace UIscripts
         {
             if (_puzzles.GetPuzzleByID(puzzleID, out var puzzle))
             {
-                _puzzleToChoose.LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.Id);
+                _puzzleToChoose.LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.ID);
                 _puzzleLoaderObject.SetActive(true);
                 _currentPuzzleSO = puzzle;
-                _currentLevel = new Level(_diffucultiesList.GridDiffucultiesList[startingGridSOindex], puzzle.Id, startingRotationRule);
+                _currentLevel = new Level(_diffucultiesList.GridDiffucultiesList[startingGridSOindex], 
+                    puzzle.ID, 
+                    startingRotationRule);
             }
             else
             {

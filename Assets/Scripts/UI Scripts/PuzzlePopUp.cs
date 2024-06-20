@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UIscripts;
+using Player;
 
 public class PuzzlePopUp : MonoBehaviour
 {
@@ -10,7 +11,12 @@ public class PuzzlePopUp : MonoBehaviour
     
     public void LoadDifficultyPanel()
     {       
-        UIManager.OnPanelClick?.Invoke(_puzzlePanelUI.PuzzleID);
-        _gameObject.SetActive(false);
+        if(PlayerData.Instance.CoinsAmount >= 1000)
+        {
+            UIManager.OnPanelClick?.Invoke(_puzzlePanelUI.PuzzleID);
+            _gameObject.SetActive(false);
+            PlayerData.Instance.SpendCoins(1000);
+        }
+
     }
 }

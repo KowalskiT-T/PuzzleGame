@@ -20,6 +20,9 @@ namespace Player
         private List<PuzzleSavingData> _savedPuzzles;
         private Level _currentPuzzle;
 
+        public delegate void OnConsumableChanges();
+        public static OnConsumableChanges onCoinsChanged;
+
         #region Singleton Pattern
         public static PlayerData Instance { get; private set; }
 
@@ -74,11 +77,13 @@ namespace Player
         {
             _coinsAmount += reward;
             PlayerPrefs.SetInt(_coinsPrefs, _coinsAmount);
+            onCoinsChanged?.Invoke();
         }
         public void SpendCoins(int amount)
         {
             _coinsAmount -= amount;
             PlayerPrefs.SetInt(_coinsPrefs, _coinsAmount);
+            onCoinsChanged?.Invoke();
         }
         public void AddHints(int reward)
         {

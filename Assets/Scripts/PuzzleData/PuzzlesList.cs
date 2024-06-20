@@ -13,7 +13,7 @@ using System.Linq;
 
         public bool GetPuzzleByID(int id, out PuzzleSO puzzleSo)
         {
-            puzzleSo = _puzzleList.FirstOrDefault(puzzle => puzzle.Id == id);
+            puzzleSo = _puzzleList.FirstOrDefault(puzzle => puzzle.ID == id);
             if(puzzleSo == null)
             {
                 Debug.LogError($"PUZZLE CAN NOT BE FOUND id = {id}");

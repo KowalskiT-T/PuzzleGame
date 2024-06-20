@@ -14,7 +14,7 @@ namespace PuzzleData
         [SerializeField] private Sprite _puzzleImage;
         [SerializeField] private bool _isLocked;
 
-        public int Id => _id;
+        public int ID => _id;
         public string Name => _name;
         public Sprite PuzzleImage => _puzzleImage;
         public bool IsLocked => _isLocked;

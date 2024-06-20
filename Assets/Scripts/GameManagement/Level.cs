@@ -11,7 +11,7 @@ namespace GameManagement
         private bool _rotationEnabled;
 
         public GridSO GridSO => _gridSO;
-        public int PuzzleID => _puzzleID; // change to int 10.06.2024
+        public int PuzzleID => _puzzleID; 
         public bool RotationEnabled => _rotationEnabled;
 
         public Level(GridSO gridSO, int puzzleID, bool rotationEnabled)

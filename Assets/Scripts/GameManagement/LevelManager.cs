@@ -29,7 +29,7 @@ namespace GameManagement
         {
             if (PlayerData.Instance == null) 
             {
-                return new Level(_debugLevel.GridSO, _debugLevel.PuzzleSO.Id, _debugLevel.RotationEnabled);
+                return new Level(_debugLevel.GridSO, _debugLevel.PuzzleSO.ID, _debugLevel.RotationEnabled);
             }
             return PlayerData.Instance.CurrentPuzzle;
         }

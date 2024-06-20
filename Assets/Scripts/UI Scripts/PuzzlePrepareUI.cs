@@ -88,5 +88,6 @@ public class PuzzlePrepareUI : MonoBehaviour
     private void OnDisable()
     {
         _contentPanel.localPosition = new Vector3(0, _contentPanel.localPosition.y, _contentPanel.localPosition.z);
+        ItemChanging?.Invoke(_contentPanel.localPosition.x);
     }
 }

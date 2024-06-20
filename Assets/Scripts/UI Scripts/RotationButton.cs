@@ -1,4 +1,6 @@
 using DG.Tweening;
+using TMPro;
+using UIscripts;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,19 +13,19 @@ public class RotationButton : MonoBehaviour
 
     [SerializeField] private Image _turnedONRotationIMG;
     [SerializeField] private Image _turnedOFFRotationIMG;
-
-    //[SerializeField] private Button _turnedONRotationBTN;
-    //[SerializeField] private Button _turnedOFFRotationBTN;
+    [SerializeField] private Color _turnedONRotationColor;
 
     [SerializeField] private Button _toggleButton;
 
+    [SerializeField] private TextMeshProUGUI _rotatePartText;
+
     private float _moveX = 70f;
     private float _moveXDuration = 0.5f;
+    private float _colorDuration = 1f;
     private bool _isTurnedON;
 
     private Sequence _toggleONSequence;
     private Sequence _toggleOFFSequence;
-
 
     private void Awake()
     {
@@ -32,44 +34,45 @@ public class RotationButton : MonoBehaviour
     }
     private void OnEnable()
     {
-        //_toggleONSequence.
-        //    Append(_slider.DOLocalMoveX(_moveX, _moveXDuration)).
-        //    Append(_turnedONRotationRT.DOLocalRotate(new Vector3(0, 0, -25), _moveXDuration)).
-        //    Append(_turnedONRotationRT.DOLocalRotate(new Vector3(0, 0, 0), _moveXDuration));
-        //_toggleOFFSequence.
-        //  Append(_slider.DOLocalMoveX(-_moveX, _moveXDuration));
-        //_toggleButton.onClick.AddListener(CheckRotation);
-        _moveX = _slider.sizeDelta.x / 2;       
-       
+        _toggleButton.onClick.AddListener(CheckRotation);
+        _moveX = _slider.sizeDelta.x / 2;              
     }
     private void OnDisable()
     {
-        //_toggleButton.onClick.RemoveListener(CheckRotation);
+        _toggleButton.onClick.RemoveListener(CheckRotation);
     }
     public void CheckRotation()
     {
         if(_isTurnedON)
         {
-            TurnOFFRotation();
+            TurnOFFRotation();          
         }
         else
         {
             TurnONRotation();
         }
+        UIManager.onRotationChange?.Invoke();
     }
 
     private void TurnONRotation()
     {
         _isTurnedON = true;
-        //_toggleONSequence.Play();
-        _slider.DOLocalMoveX(_moveX, _moveXDuration);
-        _turnedONRotationRT.DOLocalRotate(new Vector3(0, 0, -25), _moveXDuration);
-        _turnedONRotationRT.DOLocalRotate(new Vector3(0, 0, 0), _moveXDuration);
+        _rotatePartText.text = "Rotate parts: Yes";
+        _slider.DOLocalMoveX(_moveX, _moveXDuration).OnComplete(()=>
+        {
+            _turnedONRotationIMG.DOColor(_turnedONRotationColor, _colorDuration);
+            _turnedONRotationRT.DOLocalRotate(new Vector3(0, 0, -25), _moveXDuration).OnComplete(() =>
+            {
+                _turnedONRotationRT.DOLocalRotate(new Vector3(0, 0, 0), _moveXDuration);
+            });
+        });     
     }
 
     private void TurnOFFRotation()
     {
         _isTurnedON = false;
+        _rotatePartText.text = "Rotate parts: No";
         _slider.DOLocalMoveX(-_moveX, _moveXDuration);
+        _turnedONRotationIMG.DOColor(Color.white, _colorDuration);
     }
 }
