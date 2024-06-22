@@ -1,13 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using Player;
 using System;
-using PuzzleData;
-using GameManagement;
 using Grid;
 using UnityEngine.SceneManagement;
 
@@ -50,9 +46,7 @@ namespace UIscripts
         public static OnRotationChange onRotationChange;
 
         [SerializeField] private GridSOList _diffucultiesList;
-        private GridSO _currentGridSO;
-        private PuzzleSO _currentPuzzleSO;
-        private Level _currentLevel;
+        [SerializeField] private LevelConfigurator _levelConfigurator;
         private int startingGridSOindex = 0;
         private bool startingRotationRule;
 
@@ -79,6 +73,8 @@ namespace UIscripts
             OnLockedPanelClick -= LoadBuyPanelPopUp;
             OnPanelClick -= LoadPuzzleDifficultyChooser;
             PuzzlePrepareUI.ScrollItemChanged -= SetCurrentGridSO;
+            onRotationChange -= ChangeRotation;
+            PlayerData.onCoinsChanged -= LoadCoins;
         }
         private void Start()
         {
@@ -96,24 +92,26 @@ namespace UIscripts
         }
         public void LoadPlayerPuzzles()
         {
-            if (PlayerData.Instance.SavedPuzzles != null)
+            if (PlayerData.Instance.SavedPuzzles == null)
+                return;
+            
+            foreach (var playerPuzzle in PlayerData.Instance.SavedPuzzles)
             {
-                foreach (var playerPuzzle in PlayerData.Instance.SavedPuzzles)
+                _puzzles.List.ForEach(puzzle =>
                 {
-                    _puzzles.List.ForEach(puzzle =>
+                    if (playerPuzzle.ID == puzzle.ID)
                     {
-                        if (playerPuzzle.ID == puzzle.ID)
-                        {
-                            Instantiate(_puzzlePrefab, _playerPuzzleParent.transform).
-                            LoadPuzzlePanel(puzzle.PuzzleImage, playerPuzzle.ID);
-                        }
-                    });
-                }
-            }            
+                        Instantiate(_puzzlePrefab, _playerPuzzleParent.transform).
+                        LoadPuzzlePanel(puzzle.PuzzleImage, playerPuzzle.ID);
+                        return;
+                    }
+                });
+            }
+
         }
         public void StartPuzzle()
         {
-            PlayerData.Instance.SetCurrentPuzzle(_currentLevel);
+            PlayerData.Instance.SetCurrentPuzzle(_levelConfigurator.CurrentLevel);
             SceneManager.LoadScene("Main");
         }
         private void LoadDifficulties()
@@ -127,7 +125,7 @@ namespace UIscripts
 
         public void ChangeRotation()
         {
-            _currentLevel.SetRotation();
+            _levelConfigurator.CurrentLevel.SetToggleRotation();
         }
 
         #region MenuButtonsInteraction
@@ -167,10 +165,10 @@ namespace UIscripts
             {
                 _puzzleToChoose.LoadPuzzlePanel(puzzle.PuzzleImage, puzzle.ID);
                 _puzzleLoaderObject.SetActive(true);
-                _currentPuzzleSO = puzzle;
-                _currentLevel = new Level(_diffucultiesList.GridDiffucultiesList[startingGridSOindex], 
-                    puzzle.ID, 
-                    startingRotationRule);
+                _levelConfigurator.CurrentLevel.SetGridSO(_diffucultiesList.GridDiffucultiesList[startingGridSOindex]);
+                _levelConfigurator.CurrentLevel.SetPuzzleID(puzzle.ID);
+                _levelConfigurator.CurrentLevel.SetRotation(startingRotationRule);
+
             }
             else
             {
@@ -180,7 +178,7 @@ namespace UIscripts
         }
         private void SetCurrentGridSO(int index)
         {
-            _currentLevel.SetGridSO(_diffucultiesList.GridDiffucultiesList[index]);
+            _levelConfigurator.CurrentLevel.SetGridSO(_diffucultiesList.GridDiffucultiesList[index]);
         }
         #endregion
 

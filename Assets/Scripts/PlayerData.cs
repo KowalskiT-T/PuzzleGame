@@ -17,7 +17,7 @@ namespace Player
 
         private int _coinsAmount;
         private int _hintsAmount;
-        private List<PuzzleSavingData> _savedPuzzles;
+        private List<PuzzleSavingData> _savedPuzzles;//
         private Level _currentPuzzle;
 
         public delegate void OnConsumableChanges();

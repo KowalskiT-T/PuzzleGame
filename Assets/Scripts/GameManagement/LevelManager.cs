@@ -10,18 +10,22 @@ namespace GameManagement
 {
     public class LevelManager : MonoBehaviour
     {
-        public static Action<Level, PuzzleList> LevelStarted;
+        public static Action<Level, PuzzleList> OnLevelStarted;
 
         [SerializeField] private PuzzleList _puzzleList;
         [SerializeField] private ProgressManager _progressManager;
         [SerializeField] private LevelDebugShell _debugLevel;
 
+        private void OnEnable()
+        {
+            
+        }
         private void Start()
         {
             Level currentLevel = SetupCurrentLevel();
 
             _progressManager.SetNumberOfPieces(currentLevel.GridSO.Area);
-
+           
             StartLevel(currentLevel);
         }
 
@@ -36,7 +40,7 @@ namespace GameManagement
 
         private void StartLevel(Level level)
         {
-            LevelStarted?.Invoke(level, _puzzleList);
+            OnLevelStarted?.Invoke(level, _puzzleList);
         }
 
     }

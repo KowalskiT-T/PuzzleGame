@@ -24,12 +24,12 @@ namespace Grid
 
         private void OnEnable()
         {
-            LevelManager.LevelStarted += HandleLevelStarted;
+            LevelManager.OnLevelStarted += HandleLevelStarted;
         }
 
         private void OnDisable()
         {
-            LevelManager.LevelStarted -= HandleLevelStarted;
+            LevelManager.OnLevelStarted -= HandleLevelStarted;
         }
 
         private void HandleLevelStarted(Level level, PuzzleList puzzleList)
@@ -44,7 +44,7 @@ namespace Grid
             _gridField.Initialize(_gridSO);
 
             if(puzzleList.GetPuzzleByID(level.PuzzleID, out var puzzle))
-                    _gridGenerator.InitializeGrid(_gridSO, puzzle.PuzzleImage.texture);
+                    _gridGenerator.InitializeGrid (_gridSO, puzzle.PuzzleImage.texture);
             else { Debug.LogError($"GridManager: ERROR WITH PUZZLE ID");}
 
             _gridInteractionController.SetRotationEnabled(level.RotationEnabled);

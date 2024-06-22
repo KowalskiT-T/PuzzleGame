@@ -8,12 +8,12 @@ public class PreviewPuzzlePanel : MonoBehaviour
 
     private void OnEnable()
     {
-        LevelManager.LevelStarted += HandleLevelStarted;
+        LevelManager.OnLevelStarted += HandleLevelStarted;
     }
 
     private void OnDisable()
     {
-        LevelManager.LevelStarted -= HandleLevelStarted;
+        LevelManager.OnLevelStarted -= HandleLevelStarted;
     }
 
     private void HandleLevelStarted(Level level, PuzzleList puzzleList)
@@ -24,7 +24,7 @@ public class PreviewPuzzlePanel : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"PreviewPuzzlePanel: EROR BY PUZZLE ID");
+            Debug.LogError($"PreviewPuzzlePanel: ERROR BY PUZZLE ID");
         }
         
     }
