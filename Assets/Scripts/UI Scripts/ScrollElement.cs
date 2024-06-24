@@ -15,6 +15,7 @@ public class ScrollElement : MonoBehaviour
     [SerializeField] private RectTransform _scrollElementTransform;
     [SerializeField] private Image _scrollElementImage;
     [SerializeField] private TextMeshProUGUI _scrollElementText;
+    [SerializeField] private Button _scrollElementButton;
 
     [Header("Element Parameters")]
     [SerializeField] private float _scrollElementSize;
@@ -44,8 +45,19 @@ public class ScrollElement : MonoBehaviour
         AdjustScrollElementAnimationCurveSize();
         AdjustScrollElementAnimationCurveColor();
         AdjustRewardTextColor();
-        PuzzlePrepareUI.ItemChanging += SetBasicScrollElementParameters;
+        PuzzlePrepareUI.ItemChanging += SetBasicScrollElementParameters;        
     }
+
+    private void OnEnable()
+    {
+        _scrollElementButton.onClick.AddListener(ElementClick);
+    }
+
+    private void OnDisable()
+    {
+        _scrollElementButton.onClick.RemoveListener(ElementClick);
+    }
+
     private void AdjustScrollElementAnimationCurveSize()
     {
         AddingKeys(_scrollElementAnimationCurveSize, _fullWidth, _basicScaleScrollElement, _activeScaleScrollElement);
@@ -91,5 +103,10 @@ public class ScrollElement : MonoBehaviour
         AnimationCurve.AddKey(time, basicValue);
         AnimationCurve.AddKey(-time, basicValue);
         AnimationCurve.AddKey(0, activeValue);
+    }
+
+    private void ElementClick()
+    {
+        PuzzlePrepareUI.OnElementClick?.Invoke(_scrollElementNumber);
     }
 }

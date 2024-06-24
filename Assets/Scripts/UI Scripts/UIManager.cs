@@ -6,6 +6,7 @@ using Player;
 using System;
 using Grid;
 using UnityEngine.SceneManagement;
+using PuzzleData;
 
 namespace UIscripts
 {

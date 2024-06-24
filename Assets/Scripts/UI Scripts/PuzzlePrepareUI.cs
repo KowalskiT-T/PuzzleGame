@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Grid;
 using System;
 using System.Collections;
@@ -19,6 +20,7 @@ public class PuzzlePrepareUI : MonoBehaviour
 
     public static Action<float> ItemChanging;
     public static Action<int> ScrollItemChanged;
+    public static Action<int> OnElementClick;
 
     private float _snapSpeed;
     private bool _isSnapped;
@@ -27,6 +29,17 @@ public class PuzzlePrepareUI : MonoBehaviour
     private float _fullwidth;
     private int _maxScrollvelocity = 200;
 
+    private void OnEnable()
+    {
+        OnElementClick += MoveToElement;
+    }
+
+    private void OnDisable()
+    {
+        _contentPanel.localPosition = new Vector3(0, _contentPanel.localPosition.y, _contentPanel.localPosition.z);
+        ItemChanging?.Invoke(_contentPanel.localPosition.x);
+        OnElementClick -= MoveToElement;
+    }
 
     private void Start()
     {
@@ -70,6 +83,20 @@ public class PuzzlePrepareUI : MonoBehaviour
         }
     }
 
+    public void MoveToElement(int elementIndex)
+    {
+        _isSnapped = true;
+        _contentPanel.DOLocalMoveX(-elementIndex * _fullwidth, 0.25f).OnUpdate(() =>
+        {
+
+            ItemChanging?.Invoke(_contentPanel.localPosition.x);
+
+        }).OnComplete(() =>
+        {
+            _isSnapped = false;
+        });
+    }
+
     private void ChagingDifficulty(int currentItemSnapping)
     {
         if (_currentItemSnapping != currentItemSnapping)
@@ -85,9 +112,5 @@ public class PuzzlePrepareUI : MonoBehaviour
              ItemChanging?.Invoke(_contentPanel.localPosition.x);
     }
 
-    private void OnDisable()
-    {
-        _contentPanel.localPosition = new Vector3(0, _contentPanel.localPosition.y, _contentPanel.localPosition.z);
-        ItemChanging?.Invoke(_contentPanel.localPosition.x);
-    }
+
 }

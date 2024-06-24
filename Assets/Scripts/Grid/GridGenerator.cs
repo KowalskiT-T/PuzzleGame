@@ -20,7 +20,6 @@ namespace Grid {
         private Vector3 _startPosition;
         private Material _material;
 
-
         public void InitializeGrid(GridSO gridSO, Texture2D texture)
         {
             _gridSO = gridSO;

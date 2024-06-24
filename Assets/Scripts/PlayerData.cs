@@ -4,6 +4,7 @@ using PuzzleData;
 using Newtonsoft.Json;
 using GameManagement;
 using Grid;
+using System.Linq;
 
 namespace Player
 {
@@ -17,7 +18,7 @@ namespace Player
 
         private int _coinsAmount;
         private int _hintsAmount;
-        private List<PuzzleSavingData> _savedPuzzles;//
+        private List<PuzzleSavingData> _savedPuzzles;
         private Level _currentPuzzle;
 
         public delegate void OnConsumableChanges();
@@ -95,6 +96,16 @@ namespace Player
             _hintsAmount -= amount;
             PlayerPrefs.SetInt(_hintsPrefs, _hintsAmount);
         }
+        #endregion
+
+        #region Search
+
+        public bool TryGetSavedPuzzle(int puzzleID, out PuzzleSavingData savedPuzzle)
+        {
+            savedPuzzle = _savedPuzzles.FirstOrDefault(puzzle => puzzleID == puzzle.ID);
+            return savedPuzzle != null;
+        }
+
         #endregion
 
         public int CoinsAmount => _coinsAmount;
