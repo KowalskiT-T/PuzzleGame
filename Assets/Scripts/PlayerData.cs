@@ -52,18 +52,11 @@ namespace Player
                 _currentPuzzle = JsonConvert.DeserializeObject<Level>(PlayerPrefs.GetString(_currentLevel));
             }
         }
-
         public void SavePlayerPuzzleProgress(PuzzleSavingData puzzleToSave)
         {
             _savedPuzzles.Add(puzzleToSave);
-        }
-        public void SavePlayerPuzzleProgress()
-        {
-            if (_savedPuzzles != null)
-            {
-                string savedPuzzles = JsonConvert.SerializeObject(_savedPuzzles);
-                PlayerPrefs.SetString(_savedPuzzlesPref, savedPuzzles);
-            }
+            string savedPuzzles = JsonConvert.SerializeObject(_savedPuzzles);
+            PlayerPrefs.SetString(_savedPuzzlesPref, savedPuzzles);
         }
         public void SetCurrentPuzzle(Level puzzle)
         {
@@ -102,7 +95,12 @@ namespace Player
 
         public bool TryGetSavedPuzzle(int puzzleID, out PuzzleSavingData savedPuzzle)
         {
-            savedPuzzle = _savedPuzzles.FirstOrDefault(puzzle => puzzleID == puzzle.ID);
+            savedPuzzle = _savedPuzzles?.FirstOrDefault(puzzle => puzzleID == puzzle.ID);
+            if (savedPuzzle == null)
+            {
+                //Debug.LogError($"PUZZLE CAN NOT BE FOUND id = {puzzleID}");
+                return false;
+            }
             return savedPuzzle != null;
         }
 

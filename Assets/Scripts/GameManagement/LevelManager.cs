@@ -35,15 +35,14 @@ namespace GameManagement
 
             if(PlayerData.Instance.TryGetSavedPuzzle(currentLevel.PuzzleID, out var puzzle))
             {
-
                 _progressManager.SetNumberOfPieces(puzzle.Grid.Area);
                 UnityEngine.Random.InitState(puzzle.LevelSeed);
+                Debug.Log($"Load Saved Level {puzzle.ID}");
                 //start saved level 24.06.2024
             }
             else
             {
                 _progressManager.SetNumberOfPieces(currentLevel.GridSO.Area);
-
                 var seed = DateTime.Now.ToString("yyyyMMddHHmmssfff").GetHashCode();
                 UnityEngine.Random.InitState(seed);
                 _savingPuzzle = new PuzzleSavingData.Builder()
@@ -51,7 +50,7 @@ namespace GameManagement
                     .AddGrid(currentLevel.GridSO)
                     .AddSeed(seed)
                     .Build();
-                
+                Debug.Log($"Level Saved {_savingPuzzle.ID}");
                      
                 StartLevel(currentLevel);
             }
@@ -74,7 +73,7 @@ namespace GameManagement
 
         public void SaveLevel()
         {
-
+            PlayerData.Instance.SavePlayerPuzzleProgress(_savingPuzzle);
         }
 
     }
