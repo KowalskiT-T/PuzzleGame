@@ -18,5 +18,7 @@ namespace Grid
         public int Area => _width * _height;
 
         public int CoinReward => _coinReward;
+
+        public int Edges => (_width * 2) + (_height * 2) - 4;
     }
 }
