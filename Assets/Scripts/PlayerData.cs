@@ -20,7 +20,7 @@ namespace Player
 
         private int _coinsAmount;
         private int _hintsAmount;
-        private List<PuzzleSavingData> _savedPuzzles;
+        private List<PuzzleSavingData> _savedPuzzles = new List<PuzzleSavingData>();
         private Level _currentPuzzle;
 
         public delegate void OnConsumableChanges();
@@ -50,12 +50,15 @@ namespace Player
             Debug.Log("Coins" + _coinsAmount);  
             _hintsAmount = PlayerPrefs.GetInt(_hintsPrefs, 3);
             Debug.Log("Hints" + _hintsAmount);
-            _savedPuzzles = JsonConvert.DeserializeObject<List<PuzzleSavingData>>(PlayerPrefs.GetString(_savedPuzzlesPref));            
+            _savedPuzzles = JsonConvert.DeserializeObject<List<PuzzleSavingData>>(PlayerPrefs.GetString(_savedPuzzlesPref));
+            if (_savedPuzzles == null)
+            {
+                _savedPuzzles = new List<PuzzleSavingData>();
+            }
             if(PlayerPrefs.GetString(_currentLevel) != null)
             {
                 _currentPuzzle = JsonConvert.DeserializeObject<Level>(PlayerPrefs.GetString(_currentLevel));
-            }
-            _savedPuzzles = JsonConvert.DeserializeObject<List<PuzzleSavingData>>(PlayerPrefs.GetString(_savedPuzzlesPref));           
+            }           
             _themeID = PlayerPrefs.GetInt(_themePref, 0);
         }
 

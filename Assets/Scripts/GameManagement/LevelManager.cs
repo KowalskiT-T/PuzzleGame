@@ -45,12 +45,13 @@ namespace GameManagement
                 _progressManager.SetNumberOfPieces(currentLevel.GridSO);
                 var seed = DateTime.Now.ToString("yyyyMMddHHmmssfff").GetHashCode();
                 UnityEngine.Random.InitState(seed);
-                _savingPuzzle = new PuzzleSavingData.Builder()
-                    .AddIndex(currentLevel.PuzzleID)
-                    .AddGrid(currentLevel.GridSO)
-                    .AddSeed(seed)
+                _savingPuzzle = PuzzleSavingDataBuilder.Empty()
+                    .WithPuzzleID(currentLevel.PuzzleID)
+                    .WithGrid(currentLevel.GridSO)
+                    .WithSeed(seed)
                     .Build();
                 Debug.Log($"Level Saved {_savingPuzzle.ID}");
+                SaveLevel();
                      
                 StartLevel(currentLevel);
             }
