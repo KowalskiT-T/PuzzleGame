@@ -15,6 +15,8 @@ namespace Player
         private readonly string _hintsPrefs = "player_hints";
         private readonly string _savedPuzzlesPref = "player_savedPuzzle";
         private readonly string _currentLevel = "player_savedCurrentPuzzle";
+        private readonly string _savedCurrentPuzzlePref = "player_savedCurrentPuzzle";
+        private readonly string _themePref = "player_theme";
 
         private int _coinsAmount;
         private int _hintsAmount;
@@ -23,6 +25,8 @@ namespace Player
 
         public delegate void OnConsumableChanges();
         public static OnConsumableChanges onCoinsChanged;
+        private PuzzleSavingData _currentPuzzle;
+        private int _themeID;
 
         #region Singleton Pattern
         public static PlayerData Instance { get; private set; }
@@ -51,6 +55,16 @@ namespace Player
             {
                 _currentPuzzle = JsonConvert.DeserializeObject<Level>(PlayerPrefs.GetString(_currentLevel));
             }
+            _savedPuzzles = JsonConvert.DeserializeObject<List<PuzzleSavingData>>(PlayerPrefs.GetString(_savedPuzzlesPref));
+            _currentPuzzle = JsonConvert.DeserializeObject<PuzzleSavingData>(PlayerPrefs.GetString(_savedCurrentPuzzlePref));
+
+            _themeID = PlayerPrefs.GetInt(_themePref, 0);
+        }
+
+        public void SaveThemeID(int id)
+        {
+            _themeID = id;
+            PlayerPrefs.SetInt(_themePref, id);
         }
         public void SavePlayerPuzzleProgress(PuzzleSavingData puzzleToSave)
         {
@@ -59,6 +73,17 @@ namespace Player
             PlayerPrefs.SetString(_savedPuzzlesPref, savedPuzzles);
         }
         public void SetCurrentPuzzle(Level puzzle)
+
+        public void SavePlayerPuzzleProgress()
+        {
+            if (_savedPuzzles != null)
+            {
+                string savedPuzzles = JsonConvert.SerializeObject(_savedPuzzles);
+                PlayerPrefs.SetString(_savedPuzzlesPref, savedPuzzles);
+            }
+        }
+
+        public void SetCurrentPuzzle(PuzzleSavingData puzzle)
         {
             _currentPuzzle = puzzle;
             PlayerPrefs.SetString(_currentLevel, JsonConvert.SerializeObject(puzzle));
@@ -79,16 +104,20 @@ namespace Player
             PlayerPrefs.SetInt(_coinsPrefs, _coinsAmount);
             onCoinsChanged?.Invoke();
         }
+
         public void AddHints(int reward)
         {
             _hintsAmount += reward;
             PlayerPrefs.SetInt(_coinsPrefs, _hintsAmount);
         }
-        public void SpendHints(int amount)
+
+        public void UseHint()
         {
-            _hintsAmount -= amount;
+            _hintsAmount--;
+            Debug.Log("Hint Used");
             PlayerPrefs.SetInt(_hintsPrefs, _hintsAmount);
         }
+
         #endregion
 
         #region Search
@@ -110,6 +139,8 @@ namespace Player
         public int HintsAmount => _hintsAmount;
         public List<PuzzleSavingData> SavedPuzzles => _savedPuzzles;
         public Level CurrentPuzzle => _currentPuzzle;
+        public PuzzleSavingData CurrentPuzzle => _currentPuzzle;
+        public int ThemeID => _themeID;
     }
 }
 
